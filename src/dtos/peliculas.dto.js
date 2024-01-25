@@ -5,7 +5,7 @@ export function getPeliculasDto(peliculas){
             idpeliculas: peliculas.idpeliculas || " ",
             nombre: peliculas.nombre || " ",
             descripcion: peliculas.descripcion || " ",
-            linkTriller: peliculas.linkTriler || " ",
+            linkTriler: peliculas.linkTriler || " ",
             director: peliculas.director || " ",
             duracion: peliculas.duracion || " ",
             diaAgregado: peliculas.diaAgregado || " ",

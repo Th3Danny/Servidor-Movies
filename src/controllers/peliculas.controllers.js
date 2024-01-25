@@ -1,4 +1,5 @@
 import * as peliculasService from "../services/peliculas.service.js"
+import { postPeliculaServices } from "../services/peliculas.service.js"
 export const getPeliculasController = async (req, res) => {
     try{
         const results = await peliculasService.getPeliculasService()
@@ -27,3 +28,10 @@ export const getPeliculasIdController = async (req, res) => {
     }
   };
   
+  export const postPeliculaController = async (req, res) => {
+    const pelicula=req.body;
+    postPeliculaServices(pelicula)
+    .then((pelicula)=> res.status(200).json(pelicula))
+    .catch((error)=> res.status(500).send(error.message))
+
+};

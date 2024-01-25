@@ -25,18 +25,18 @@ const peliculasScham = z.object ({
         required_error: "director is required "
       }),
 
-      duracion: z.number({
-        invalid_type_error: "duracion tiene que ser number",
+      duracion: z.string({
+        invalid_type_error: "duracion tiene que ser string",
         required_error: "fecha is required "
       }),
 
-      diaAgregado: z.coerce.date({
-        invalid_type_error: "fecha tiene que ser date",
+      diaAgregado: z.string({
+        invalid_type_error: "fecha tiene que ser string",
         required_error: "fecha is required "
       }),
 
       imagen: z.string({
-        invalid_type_error: "imagen tiene que ser estring",
+        invalid_type_error: "imagen tiene que ser string",
         required_error: "imagen is required "
       }),
 
