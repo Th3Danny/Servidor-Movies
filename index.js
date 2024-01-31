@@ -4,17 +4,27 @@ import dotenv from 'dotenv';
 import db from './src/config/db.js';
 import indexRoutes from './src/routes/index.routes.js';
 
-import http from 'http';
+import { createServer } from "http";
 import { WebSocket, WebSocketServer } from 'ws';
-
+import ConectarSocket from './src/socketIo/Socket.js';
 dotenv.config();
 
 const app = express();
+
+
+
 app.use(cors());
 app.use(express.json());
 app.set('PORT', process.env.PORT || 3000);
+const server = createServer(app);
 
-app.listen(app.get('PORT'), () => {
+
+
+// const socketServer = new SocketServer(server);
+// socketServer.handleConection()
+
+
+server.listen(app.get('PORT'), () => {
     console.log('Escuchando en el puerto ' + app.get('PORT'));
 });
 
@@ -31,8 +41,11 @@ db.connect()
     .catch((err) => {
         console.error(err);
     });
+    ConectarSocket(server);
 
-const server = http.createServer(app);
+
+// const server = createServer(app);
+
 const wss = new WebSocketServer({ port: 3002 });
 
 wss.on('connection', (socket) => {
@@ -52,8 +65,71 @@ wss.on('connection', (socket) => {
 
     socket.on('close', () => {
         console.log('Usuario desconectado');
+    })
+        
     });
+    
 
-    // Para emitir un mensaje a un cliente específico:
-    // socket.send('Hola cliente!');
+
+
+
+//Long Polling-------------------------------------------------------------------------------------------------
+const peliculaNotificacion = [
+    {id: 1, notification: "Una nueva pelicula agregada"}, 
+    {id: 2, notification: "Se elimino una nueva pelicula"} 
+  ]
+  
+  let resPeliculasNotificaciones = [];
+  
+  app.get('/notificaciones', (req, res) => {
+    res.status(200).json({
+        success: true,
+        notificaciones: peliculaNotificacion
+    });
 });
+
+  
+  app.get('/nueva-notificacion', (req, res) => {
+    resPeliculasNotificaciones.push(res);
+  
+    req.on('close', () => {
+        const index = resPeliculasNotificaciones.indexOf(res);
+        if (index !== -1) {
+            resPeliculasNotificaciones.splice(index, 1);
+        }
+    });
+  });
+  
+  app.post('/notificaciones', (req, res) => {
+    let idNotificaciones = peliculaNotificacion.length > 0 ? peliculaNotificacion[peliculaNotificacion.length - 1].id + 1 : 1;
+  
+    const nuevaNotificacion = {
+        id: idNotificaciones,
+        notificacion: req.body.notificacion
+    };
+  
+    peliculaNotificacion.push(nuevaNotificacion);
+  
+  
+    responderPeliculasNuevas(nuevaNotificacion);
+  
+    res.status(201).json({
+        success: true,
+        message: "pelicula creada"
+    });
+  });
+  
+  function responderPeliculasNuevas(nuevaNotificacion) {
+    for (let i = 0; i < resPeliculasNotificaciones.length; i++) {
+        const res = resPeliculasNotificaciones[i];
+        try {
+            res.status(200).json({
+                success: true,
+                notificacion: nuevaNotificacion
+            });
+        } catch (error) {
+            console.error('Error al enviar actualización de la película:', error.message);
+        }
+    }
+  }
+  
