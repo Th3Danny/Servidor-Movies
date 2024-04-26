@@ -3,15 +3,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './src/config/db.js';
 import indexRoutes from './src/routes/index.routes.js';
-
+import rateLimit from 'express-rate-limit';
 import { createServer } from "http";
 import { WebSocket, WebSocketServer } from 'ws';
 import ConectarSocket from './src/socketIo/Socket.js';
 dotenv.config();
 
 const app = express();
-
-
 
 app.use(cors());
 app.use(express.json());
@@ -20,9 +18,19 @@ const server = createServer(app);
 
 
 
-// const socketServer = new SocketServer(server);
-// socketServer.handleConection()
+const accountLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hora
+    max: 6, // limita cada IP a 6 peticiones por el tiempo definido con "windowMs"
+    message: "Demasiadas peticiones realizadas, intenta despues de 1 hora"
+  });
 
+  app.get("/", accountLimiter, (req, res) => {
+    res.send('hola mundo ...')
+  });
+
+  app.post('/create-account', accountLimiter, (req, res) => {
+    res.send('Cuenta creada');
+ })
 
 server.listen(app.get('PORT'), () => {
     console.log('Escuchando en el puerto ' + app.get('PORT'));
