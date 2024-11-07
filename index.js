@@ -20,7 +20,7 @@ const server = createServer(app);
 
 const accountLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hora
-    max: 6, // limita cada IP a 6 peticiones por el tiempo definido con "windowMs"
+    max: 6, 
     message: "Demasiadas peticiones realizadas, intenta despues de 1 hora"
   });
 
